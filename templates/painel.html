@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+
+<meta charset="UTF-8">
+<title>Painel - Sistema de Coleta</title>
+
+<style>
+
+body{
+
+margin:0;
+font-family:Arial;
+
+background-image:url("/static/img_fundo.png");
+background-size:cover;
+background-position:center;
+background-repeat:no-repeat;
+
+color:white;
+
+}
+
+.container{
+
+width:90%;
+margin:auto;
+margin-top:40px;
+
+background:rgba(0,0,0,0.6);
+padding:30px;
+border-radius:10px;
+
+}
+
+h1{
+
+text-align:center;
+margin-bottom:30px;
+
+}
+
+form{
+
+margin-bottom:20px;
+
+}
+
+input{
+
+padding:8px;
+border:none;
+border-radius:5px;
+
+}
+
+button{
+
+padding:8px 15px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+
+}
+
+.btn-verde{
+
+background:#28a745;
+color:white;
+
+}
+
+.btn-vermelho{
+
+background:#dc3545;
+color:white;
+
+}
+
+.btn-azul{
+
+background:#007bff;
+color:white;
+
+}
+
+table{
+
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+
+}
+
+th,td{
+
+padding:10px;
+text-align:center;
+
+}
+
+th{
+
+background:rgba(255,255,255,0.1);
+
+}
+
+tr:nth-child(even){
+
+background:rgba(255,255,255,0.05);
+
+}
+
+a{
+
+color:white;
+text-decoration:none;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Ranking de Setores</h1>
+
+<!-- CADASTRAR SETOR -->
+
+<form action="/cadastrar" method="POST">
+
+<input type="text" name="codigo" placeholder="Código do setor" required>
+
+<button class="btn-verde">Cadastrar</button>
+
+</form>
+
+
+<!-- IMPORTAR PLANILHAS -->
+
+<form action="/upload" method="post" enctype="multipart/form-data">
+
+<input type="file" name="arquivos" multiple>
+
+<button type="submit">
+Importar Planilhas
+</button>
+
+</form>
+
+
+<!-- RESETAR RESULTADOS -->
+
+<a href="/resetar">
+
+<button class="btn-vermelho">Resetar Resultados</button>
+
+</a>
+
+
+<!-- TABELA RANKING -->
+
+<table>
+
+<tr>
+
+<th>Ranking</th>
+<th>Setor</th>
+<th>Peso Total</th>
+<th>Horas</th>
+<th>Excluir</th>
+
+</tr>
+
+{% for setor in setores %}
+
+<tr>
+
+<td>{{ loop.index }}</td>
+
+<td>{{ setor.codigo }}</td>
+
+<td>{{ "%.2f"|format(setor.total) }}</td>
+
+<td>{{ setor.horas_formatadas }}</td>
+
+<td>
+
+<a href="{{ url_for('excluir', id=setor.id) }}"
+onclick="return confirm('Deseja excluir este setor?')">
+
+<button class="btn-vermelho">
+
+Excluir
+
+</button>
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+</body>
+</html>
