@@ -1,121 +1,104 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
 
 <meta charset="UTF-8">
-<title>Painel - Sistema de Coleta</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Painel</title>
 
 <style>
 
 body{
 
-margin:0;
-font-family:Arial;
+    margin:0;
+    padding:0;
 
-background-image:url("/static/img_fundo.png");
-background-size:cover;
-background-position:center;
-background-repeat:no-repeat;
+    font-family: Arial, Helvetica, sans-serif;
 
-color:white;
-height:100%;
+    background-image: url("/static/img_fundo.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    min-height:100vh;
 
 }
 
 .container{
 
-width:90%;
-margin:auto;
-margin-top:40px;
+    background: rgba(0,0,0,0.65);
 
-background:rgba(0,0,0,0.6);
-padding:30px;
-border-radius:10px;
+    margin:20px;
+
+    padding:20px;
+
+    border-radius:10px;
+
+    color:white;
 
 }
 
 h1{
 
-text-align:center;
-margin-bottom:30px;
-
-}
-
-form{
-
-margin-bottom:20px;
-
-}
-
-input{
-
-padding:8px;
-border:none;
-border-radius:5px;
-
-}
-
-button{
-
-padding:8px 15px;
-border:none;
-border-radius:5px;
-cursor:pointer;
-
-}
-
-.btn-verde{
-
-background:#28a745;
-color:white;
-
-}
-
-.btn-vermelho{
-
-background:#dc3545;
-color:white;
-
-}
-
-.btn-azul{
-
-background:#007bff;
-color:white;
+    text-align:center;
 
 }
 
 table{
 
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
+    width:100%;
+
+    border-collapse: collapse;
 
 }
 
 th,td{
 
-padding:10px;
-text-align:center;
+    padding:10px;
+
+    text-align:center;
 
 }
 
 th{
 
-background:rgba(255,255,255,0.1);
+    background:#2c3e50;
 
 }
 
-tr:nth-child(even){
+td{
 
-background:rgba(255,255,255,0.05);
+    background:rgba(255,255,255,0.1);
 
 }
 
-a{
+input{
 
-color:white;
-text-decoration:none;
+    padding:8px;
+
+}
+
+button{
+
+    padding:8px 15px;
+
+    border:none;
+
+    background:#27ae60;
+
+    color:white;
+
+    cursor:pointer;
+
+}
+
+button:hover{
+
+    background:#219150;
 
 }
 
@@ -127,79 +110,54 @@ text-decoration:none;
 
 <div class="container">
 
-<h1>Ranking de Setores</h1>
-
-<!-- CADASTRAR SETOR -->
+<h1>Painel de Controle</h1>
 
 <form action="/cadastrar" method="POST">
 
 <input type="text" name="codigo" placeholder="Código do setor" required>
 
-<button class="btn-verde">Cadastrar</button>
+<button type="submit">Cadastrar</button>
 
 </form>
 
+<br>
 
-<!-- IMPORTAR PLANILHAS -->
-
-<form action="/upload" method="post" enctype="multipart/form-data">
+<form action="/upload" method="POST" enctype="multipart/form-data">
 
 <input type="file" name="arquivos" multiple>
 
-<button type="submit">
-Importar Planilhas
-</button>
+<button type="submit">Importar Planilhas</button>
 
 </form>
 
+<br>
 
-<!-- RESETAR RESULTADOS -->
+<a href="/resetar">Resetar Dados</a>
 
-<a href="/resetar">
-
-<button class="btn-vermelho">Resetar Resultados</button>
-
-</a>
-
-
-<!-- TABELA RANKING -->
+<br><br>
 
 <table>
 
 <tr>
 
-<th>Ranking</th>
 <th>Setor</th>
-<th>Peso Total</th>
+<th>Total</th>
 <th>Horas</th>
-<th>Excluir</th>
+<th>Ação</th>
 
 </tr>
 
-{% for setor in setores %}
+{% for s in setores %}
 
 <tr>
 
-<td>{{ loop.index }}</td>
-
-<td>{{ setor.codigo }}</td>
-
-<td>{{ "%.2f"|format(setor.total) }}</td>
-
-<td>{{ setor.horas_formatadas }}</td>
+<td>{{ s.codigo }}</td>
+<td>{{ "%.2f"|format(s.total) }}</td>
+<td>{{ s.horas_formatadas }}</td>
 
 <td>
 
-<a href="{{ url_for('excluir', id=setor.id) }}"
-onclick="return confirm('Deseja excluir este setor?')">
-
-<button class="btn-vermelho">
-
-Excluir
-
-</button>
-
-</a>
+<a href="/excluir/{{ s.id }}">Excluir</a>
 
 </td>
 
@@ -212,4 +170,5 @@ Excluir
 </div>
 
 </body>
+
 </html>
