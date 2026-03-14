@@ -4,12 +4,23 @@ import pandas as pd
 from datetime import datetime
 import os
 from sqlalchemy import text
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
+# ================= CONFIGURAÇÃO =================
+
 app.config['SECRET_KEY'] = '123456'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL","sqlite:///banco.db")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# sessão funcionando no render e celular
+app.config['SESSION_COOKIE_SAMESITE'] = "Lax"
+app.config['SESSION_COOKIE_SECURE'] = True
+
+# pasta de upload (corrige erro no render)
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 db = SQLAlchemy(app)
 
@@ -36,11 +47,10 @@ with app.app_context():
         pass
 
 
-# ================= LINHAS DE HORARIO =================
-# Corrigido para usar as linhas reais da planilha
+# ================= LINHAS HORARIO =================
 
 def encontrar_linhas_hora(df):
-    return [26, 54, 82]
+    return [26,54,82]
 
 
 # ================= CALCULO HORAS =================
@@ -58,7 +68,6 @@ def calcular_horas(valor):
         valor_int = int(valor)
 
         if valor_int >= 100:
-
             hora = valor_int // 100
             minuto = valor_int % 100
 
@@ -82,10 +91,8 @@ def calcular_horas(valor):
     if hora is None:
 
         try:
-
             hora = valor.hour
             minuto = valor.minute
-
         except:
             return 0
 
@@ -114,6 +121,8 @@ def login():
         if usuario == "admin" and senha == "123":
 
             session["logado"] = True
+            session.permanent = True
+
             return redirect("/painel")
 
     return render_template("login.html")
@@ -225,13 +234,18 @@ def upload():
         if not arquivo.filename.endswith(".xlsx"):
             continue
 
-        existe = Planilha.query.filter_by(nome=arquivo.filename).first()
+        nome_seguro = secure_filename(arquivo.filename)
+        caminho = os.path.join(UPLOAD_FOLDER,nome_seguro)
+
+        arquivo.save(caminho)
+
+        existe = Planilha.query.filter_by(nome=nome_seguro).first()
 
         if existe:
             continue
 
         try:
-            df = pd.read_excel(arquivo, header=None)
+            df = pd.read_excel(caminho, header=None)
         except:
             continue
 
@@ -273,7 +287,7 @@ def upload():
                 except:
                     continue
 
-        nova = Planilha(nome=arquivo.filename)
+        nova = Planilha(nome=nome_seguro)
 
         db.session.add(nova)
 
@@ -282,10 +296,17 @@ def upload():
     return redirect("/painel")
 
 
+# ================= HEALTH CHECK =================
+
+@app.route("/health")
+def health():
+    return "ok"
+
+
 # ================= EXECUTAR =================
 
 if __name__ == "__main__":
 
     port = int(os.environ.get("PORT",5000))
 
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port)
